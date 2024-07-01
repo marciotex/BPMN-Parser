@@ -1,0 +1,3 @@
+
+def adefinir():
+    pass
