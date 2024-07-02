@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'webmaster_verification',
     'django.contrib.sites',
     'django.contrib.sitemaps',
-    'parser',
+    'bpmnx',
 ]
 
 SITE_ID = 1

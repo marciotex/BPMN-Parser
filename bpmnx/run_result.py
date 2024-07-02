@@ -8,9 +8,9 @@ django_project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.
 sys.path.append(django_project_path)
 
 # Agora você pode importar os módulos do seu aplicativo Django, com caminho absoluto
-from parser.utils.bpmn_utils import parse_xml
+from bpmnx.utils.bpmn_utils import parse_xml
 #from bpmn_utils import parse_xml
-from parser.utils.data_utils import process_bpmn_data
+from bpmnx.utils.data_utils import process_bpmn_data
 
 # O os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) obtém o diretório pai do diretório
 #  atual (onde está o run_result.py), que é o diretório raiz do seu projeto Django (BPMN-Parser). 

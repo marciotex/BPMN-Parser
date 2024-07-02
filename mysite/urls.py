@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include,path
-from parser import views
+from bpmnx import views
 
 urlpatterns = [
-    path('', include('parser.urls')),
+    path('', include('bpmnx.urls')),
     path('upload', views.upload, name='upload'),
     path('admin/', admin.site.urls),
     path(r'', include('webmaster_verification.urls')),
