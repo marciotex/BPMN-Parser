@@ -5,7 +5,7 @@ import os
 
 xmlpath = "static/upload/bpmn.xml"
 
-def parse_xml():
+def parse_xml(xmlpath):
     if not os.path.exists(xmlpath):
         raise FileNotFoundError("File not found")
     tree = ElTr.parse(xmlpath)
