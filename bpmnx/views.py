@@ -22,7 +22,20 @@ def result(request):
     except FileNotFoundError:
         return upload(request, error="File not found")
 
-    lanes_data, task_data, event_data, processes_data, total_time, cycle_time, gateways_name, sum_events, sum_tasks, sum_lanes, sum_processes, flows = process_bpmn_data(myroot)
+    (
+        lanes_data,
+        task_data,
+        event_data,
+        processes_data,
+        total_time,
+        cycle_time,
+        gateways_name,
+        sum_events,
+        sum_tasks,
+        sum_lanes,
+        sum_processes,
+        flows
+    ) = process_bpmn_data(myroot)
 
     remove_xml_file()
 
