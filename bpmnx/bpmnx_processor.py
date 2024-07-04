@@ -16,7 +16,7 @@ from bpmnx.utils.data_utils import process_bpmn_data
 # sys.path.append(django_project_path) adiciona esse diretório ao PythonPATH, permitindo que o Python 
 # encontre os módulos dentro do seu aplicativo Django (parser).
 
-def run_results(filename=None):
+def result(filename=None):
     # Diretório onde o arquivo BPMN será salvo por padrão
     # não confundir com o diretório de upload
     default_xmlpath = "static/bpmn.xml"
@@ -66,4 +66,4 @@ if __name__ == "__main__":
     else:
         filename = None  # Caso nenhum argumento seja fornecido, use o arquivo padrão
 
-    run_results(filename)
+    result(filename)
