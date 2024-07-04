@@ -18,7 +18,8 @@ from bpmnx.utils.data_utils import process_bpmn_data
 
 def run_results(filename=None):
     # Diretório onde o arquivo BPMN será salvo por padrão
-    default_xmlpath = "static/upload/bpmn.xml"
+    # não confundir com o diretório de upload
+    default_xmlpath = "static/bpmn.xml"
 
     # Se o filename não foi passado como argumento, use o default_xmlpath
     if filename is None:
