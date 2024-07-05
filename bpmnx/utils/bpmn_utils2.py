@@ -1,31 +1,43 @@
 import xml.etree.ElementTree as ET
 import networkx as nx
 import matplotlib
-matplotlib.use('Agg')  # Use um backend não interativo
+matplotlib.use('Agg')  # Use a non-interactive backend
 import matplotlib.pyplot as plt
+import warnings  # Import the warnings library
 
-# Definir o caminho do arquivo XML
+# Define the XML file path
 xml_file = 'static/bpmn.xml'
 
-# Definir a função para extrair todos os elementos e atributos
+# Define the function to extract all elements and attributes
 def extract_elements_from_bpmn(xml_file, element_tags, namespaces):
-    # Analisar o arquivo XML
+    # Parse the XML file
     tree = ET.parse(xml_file)
-    # Obter o elemento raiz
+    # Get the root element
     root = tree.getroot()
-    # Criar uma lista vazia para armazenar os elementos
+    # Create an empty list to store the extracted elements
     elements = []
-    # Iterar sobre todos os elementos possíveis e adicioná-los à lista
+    # Dictionary to count all relevant elements in the XML
+    total_elements = {tag: len(root.findall(f'.//bpmn:{tag}', namespaces)) for tag in element_tags}
+    # Dictionary to keep track of extracted elements
+    extracted_elements_count = {tag: 0 for tag in element_tags}
+    # Iterate over all possible elements and add them to the list
     for tag in element_tags:
-        elements += root.findall(f'.//bpmn:{tag}', namespaces)
+        found_elements = root.findall(f'.//bpmn:{tag}', namespaces)
+        elements += found_elements
+        extracted_elements_count[tag] += len(found_elements)
+    # Compare the count with the extracted elements
+    missing_elements = {tag: total_elements[tag] - extracted_elements_count[tag] for tag in element_tags if total_elements[tag] != extracted_elements_count[tag]}
+    if missing_elements:
+        # Issue a warning if there is a discrepancy
+        missing_elements_str = ', '.join([f"{tag}: {count}" for tag, count in missing_elements.items()])
+        warnings.warn(f"Some elements were not extracted: {missing_elements_str}.")
     return elements
 
-# Definir namespaces
+# Define namespaces
 namespaces = {'bpmn': 'http://www.omg.org/spec/BPMN/20100524/MODEL'}
 
-# Lista de todos os elementos que podem ser extraídos do BPMN
-# conforme a especificação BPMN 2.0 (https://www.omg.org/spec/BPMN/2.0/)
-# nem todos necessariantemente serão utilizados
+# List of all elements that can be extracted from BPMN
+# according to the BPMN 2.0 specification (https://www.omg.org/spec/BPMN/2.0/)
 element_tags = [
     'definitions', 'import', 'extension',
     'process', 'subProcess', 'transaction', 'adHocSubProcess', 'callActivity',
@@ -38,18 +50,17 @@ element_tags = [
     'collaboration', 'participant', 'messageFlow',
     'choreography', 'choreographyTask', 'subChoreography',
     'conversation', 'subConversation', 'callConversation',
-    'BPMNShape', 'BPMNEdge', 'BPMNPlane',
     'conditionalEventDefinition', 'errorEventDefinition', 'escalationEventDefinition',
     'messageEventDefinition', 'signalEventDefinition', 'timerEventDefinition',
     'cancelEventDefinition', 'compensateEventDefinition', 'terminateEventDefinition', 'linkEventDefinition'
 ]
 
-# Definir a função para construir o grafo e armazenar artefatos e elementos gráficos em dicionários
+# Define the function to build the graph and store artifacts and graphic elements in dictionaries
 def build_bpmn_graph_and_dictionaries(xml_file, graph_elements, artifact_elements, graphic_elements):
     elements = extract_elements_from_bpmn(xml_file, element_tags, namespaces)    
-    G = nx.DiGraph()  # Grafo para armazenar elementos principais do BPMN
-    artifacts = {}    # Dicionário para armazenar artefatos
-    graphics = {}     # Dicionário para armazenar elementos gráficos
+    G = nx.DiGraph()  # Graph to store main BPMN elements
+    artifacts = {}    # Dictionary to store artifacts
+    graphics = {}     # Dictionary to store graphic elements
         
     for elem in elements:
         elem_id = elem.get('id')
@@ -68,7 +79,7 @@ def build_bpmn_graph_and_dictionaries(xml_file, graph_elements, artifact_element
             graphics[elem_id] = {'type': elem_type, **attributes}
     return G, artifacts, graphics
 
-# Definir os elementos a serem armazenados no grafo
+# Define the elements to be stored in the graph
 graph_elements = [
     'process', 'subProcess', 'transaction', 'adHocSubProcess', 'callActivity',
     'sequenceFlow', 'messageFlow', 'association',
@@ -81,59 +92,59 @@ graph_elements = [
     'messageEventDefinition', 'signalEventDefinition', 'timerEventDefinition',
     'cancelEventDefinition', 'compensateEventDefinition', 'terminateEventDefinition', 'linkEventDefinition'
 ]
-# Definir os elementos a serem armazenados na lista de Artefatos
+# Define the elements to be stored in the Artifacts list
 artifact_elements = [
     'dataObject', 'dataObjectReference', 'dataStore', 'dataStoreReference', 'dataInput', 'dataOutput',
     'textAnnotation', 'group'
 ]
 
-# Definir os elementos a serem armazenados na lista de Elementos gráficos
+# Define the elements to be stored in the Graphic Elements list
 graphic_elements = [
     'BPMNShape', 'BPMNEdge', 'BPMNPlane'
 ]
 
-# Construir o grafo e armazenar artefatos e elementos gráficos em dicionários
+# Build the graph and store artifacts and graphic elements in dictionaries
 (
     bpmn_graph,
     bpmn_artifacts,
     bpmn_graphics
 ) = build_bpmn_graph_and_dictionaries(xml_file, graph_elements, artifact_elements, graphic_elements)
 
-# Visualização dos resultados
-print("\nGrafo BPMN estruturado:")
+# Visualization of the results
+print("\nStructured BPMN Graph:")
 
-print("\nNós (nodes):\n")
+print("\nNodes:\n")
 for node, data in bpmn_graph.nodes(data=True):
     print(node, data)
 
-print("\nVértices (edges, links):\n")
+print("\nEdges (links):\n")
 print(bpmn_graph.edges(data=True))
 
-print("\nArtefatos BPMN extraído:")
+print("\nExtracted BPMN Artifacts:")
 for key, value in bpmn_artifacts.items():
     print(f"{key}: {value}")
 
-print("\nElementos Gráficos BPMN extraídos:")
+print("\nExtracted BPMN Graphic Elements:")
 for key, value in bpmn_graphics.items():
     print(f"{key}: {value}")
-# Certifique-se de que o Graphviz está instalado e acessível no seu sistema
+# Make sure Graphviz is installed and accessible on your system
 try:
-    # Tenta usar o PyGraphviz para o layout 'dot'
+    # Try to use PyGraphviz for the 'dot' layout
     pos = nx.nx_agraph.graphviz_layout(bpmn_graph, prog='dot')
 except ImportError:
     try:
-        # Como alternativa, usa o PyDot se o PyGraphviz não estiver disponível
+        # Alternatively, use PyDot if PyGraphviz is not available
         pos = nx.nx_pydot.graphviz_layout(bpmn_graph, prog='dot')
     except ImportError:
-        print("PyGraphviz ou PyDot não está instalado, usando spring_layout como fallback")
-        pos = nx.spring_layout(bpmn_graph)  # Fallback para spring_layout se necessário
+        print("PyGraphviz or PyDot is not installed, using spring_layout as a fallback")
+        pos = nx.spring_layout(bpmn_graph)  # Fallback to spring_layout if necessary
 
-# Aumente o tamanho da figura para melhorar a legibilidade
-fig, ax = plt.subplots(figsize=(40, 36))  # Ajuste o tamanho conforme necessário
+# Increase the figure size for better readability
+fig, ax = plt.subplots(figsize=(40, 36))  # Adjust the size as needed
 nx.draw(bpmn_graph, pos, with_labels=True, node_size=1500, node_color="skyblue", font_size=12, ax=ax)
 
-# Salve o desenho em um arquivo com espaço aumentado
-plt.savefig("static/grafo.png")
+# Save the drawing to a file with increased spacing
+plt.savefig("static/graph.png")
 
-# Exiba uma mensagem informando onde o arquivo foi salvo
-print("O desenho do grafo foi salvo no arquivo 'static/grafo.png'")
+# Display a message indicating where the file was saved
+print("The graph drawing has been saved in the file 'static/graph.png'")
