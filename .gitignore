@@ -1,3 +1,4 @@
 *.pyc
 static/upload/*
 static/bpmn.xml
+static/grafo.png
